@@ -3,9 +3,8 @@ package botcontroller
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"telebotgo/payment"
-	"telebotgo/payment/status"
+
 	utilsdb "telebotgo/src/db/utilsDB"
 	botview "telebotgo/src/view/bot_view"
 
@@ -17,57 +16,56 @@ func HandleMessage(update tg.Update, bot *tg.BotAPI, mpToken string) {
 	utilsdb.InsertNewUser(int64(userID))
 	var saldoAtual int64
 	msg := update.Message
-	breve := "esta função sera adicionada em breve, aguarde. Dev: @h1000dev"
+	breve := "Esta função será adicionada em breve. Aguarde. Dev: @h1000dev"
+
 	if getsaldoAtual, err := utilsdb.GetUserSaldo(int64(msg.From.ID)); err != nil {
 		log.Fatal(err)
 	} else {
 		saldoAtual += getsaldoAtual
 	}
+
 	if msg == nil {
 		return
 	}
+	ch := make(chan bool)
 	switch msg.Command() {
 	case "start":
-
-		reply := fmt.Sprintf("Olá! Seja Bem-Vindo ao %s 🛒\n\nSeu saldo atual é: %vRS\n\n Use /h ou /help", bot.Self.UserName, saldoAtual)
+		reply := fmt.Sprintf("🔷 Olá %s\n\n🔘 Seja bem-vindo, você está no %s🛒\n💸Seu saldo atual é: %vRS\n\nUse /h ou /help", msg.From.FirstName, bot.Self.UserName, saldoAtual)
 		botview.SendReply(bot, msg.Chat.ID, reply)
+
 	case "help", "h":
-		reply := "MENU: \n/recarregar Adicionar saldo\n/comprar Ver produtos a venda\n/contas Ver contas ja compradas"
+		reply := "MENU: \n/recarregar Adicionar saldo\n/comprar Ver produtos à venda\n/contas Ver contas já compradas"
 		botview.SendReply(bot, msg.Chat.ID, reply)
-	case "recarregar":
-		argumento := msg.CommandArguments()
-		if argumento == "" {
-			botview.SendReply(bot, msg.Chat.ID, "Digite a quantia que deseja recarregar\nEX:\n/recarregar 10\nOBS: o mínimo é 5RS")
-			return
-		}
 
-		valor, err := strconv.Atoi(argumento)
-		if err != nil {
-			botview.SendReply(bot, msg.Chat.ID, "Valor incompatível")
-			return
-		}
-		if valor < 5{
-			botview.SendReply(bot, msg.Chat.ID, "O valor minimo é 5RS")
-			return
-		}
-		qrCode, err := payment.PIX(valor, mpToken, userID)
+	case "recarregar":
+		valor := 0.01
+		qrCode, err := payment.PIX(valor, mpToken, userID, ch)
 		if err != nil {
 			botview.SendReply(bot, msg.Chat.ID, "Erro ao gerar QR_Code")
 		} else {
-			botview.SendReply(bot, msg.Chat.ID, fmt.Sprintf("Pix gerado com sucesso✅\n\n💠 QR_Code gerado com sucesso: %s", qrCode.QRCode))
-			go status.Status(mpToken, userID)
+			botview.SendReply(bot, msg.Chat.ID, fmt.Sprintf("Pix gerado com sucesso✅\n💠 QR_Code pix gerado `%s`", qrCode.QRCode))
+			go func() {
+				paymentApproved := <-ch
+				if paymentApproved {
+					botview.SendReply(bot, msg.Chat.ID, "Pagamento aprovado")
+				} else {
+					botview.SendReply(bot, msg.Chat.ID, "Erro no pagamento")
+				}
+			}()
 		}
 
 	case "comprar":
 		botview.SendReply(bot, msg.Chat.ID, breve)
-	case "contas":
 
+	case "contas":
 		botview.SendReply(bot, msg.Chat.ID, breve)
+
 	default:
 		reply := "Digite /help ou /h para ver os comandos da loja"
 		botview.SendReply(bot, msg.Chat.ID, reply)
 	}
 }
-func HandleCallbackQuery(callback *tg.CallbackQuery) {
 
+func HandleCallbackQuery(callback *tg.CallbackQuery) {
+	// Lógica para manipular ações de callback
 }

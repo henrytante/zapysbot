@@ -3,7 +3,6 @@ module telebotgo
 go 1.18
 
 require (
-	github.com/eduardo-mior/mercadopago-sdk-go v1.3.1
 	github.com/fatih/color v1.16.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
