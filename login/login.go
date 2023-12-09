@@ -13,7 +13,7 @@ func Logar() {
 	red := color.New(color.FgRed).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
-	db, err := sql.Open("mysql", "freedb_h1000admin:5xeYDt#@3KbqBum@tcp(sql.freedb.tech:3306)/freedb_paybotDB")
+	db, err := sql.Open("mysql", "")
 	if err != nil {
 		log.Fatal("Erro na conexão com o sistema de login")
 	}
