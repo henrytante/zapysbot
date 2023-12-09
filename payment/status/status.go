@@ -59,9 +59,13 @@ func checkPaymentStatus(paymentID int, mpToken string, ch chan<- bool) {
 			fmt.Println("Pagamento aprovado!")
 			ch <- true
 			return
+		}else if paymentStatus.Status == "cancelled"{
+			fmt.Println("Pagamento cancelado!")
+			ch <- false
+			return
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 }
 

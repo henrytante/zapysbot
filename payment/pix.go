@@ -41,6 +41,9 @@ func PIX(valor float64, mpToken string, ID int, ch chan<- bool) (*PaymentRespons
 			"email": "inijbe@gmail.com",
 		},
 	}
+	expirationTime := time.Now().Add(8 * time.Minute)
+	expirationFormatted := expirationTime.Format("2006-01-02T15:04:05.000-07:00")
+	payload["date_of_expiration"] = expirationFormatted
 
 	jsonValue, _ := json.Marshal(payload)
 

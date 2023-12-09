@@ -22,9 +22,10 @@ func InitDB()  {
 	produtos := `
 	CREATE TABLE IF NOT EXISTS products (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		type text,
+		plataforma text,
 		email text,
-		pass text
+		pass text,
+		preco int
 	);
 	`
 
